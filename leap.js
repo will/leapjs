@@ -431,12 +431,12 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
       clearTimeout(this.openTimer);
       this.openTimer = undefined;
     }
-  }
+  };
 
   Connection.prototype.handleClose = function() {
     var _this = this;
     this.openTimer = setTimeout(function() { console.log("reconnecting..."); _this.connect(); }, 1000)
-  }
+  };
 
   Connection.prototype.connect = function() {
     var _this = this

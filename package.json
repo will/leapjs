@@ -1,5 +1,5 @@
 {
-  "name": "Leap",
+  "name": "leapjs",
   "version": "0.0.1",
   "description": "Leap Motion Client",
   "main": "leap.js",
