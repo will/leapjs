@@ -437,7 +437,13 @@ Connection.prototype.connect = function() {
     _this.handleOpen()
   }
   this.socket.onmessage = function(message) {
-    _this.handleRawFrame(JSON.parse(message.data))
+    var data = JSON.parse(message.data);
+    if (data.version) {
+      console.log("version:"+data.version)
+      _this.serverVersion = data.version
+    } else {
+      _this.handleRawFrame(data)
+    }
   }
   this.socket.onclose = function(message) {
     _this.handleClose()
