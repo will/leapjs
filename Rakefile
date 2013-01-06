@@ -13,6 +13,6 @@ task :test => :build do
 end
 
 task :build do
-  File.open(File.expand_path("../leap.js", __FILE__), "w") { |f| f << ERB.new(File.read("./lib/index.js.erb")).result }
+  File.open(File.expand_path("../leap.js", __FILE__), "w") { |f| f << ERB.new(File.read("./template/leap.js.erb")).result }
   system("./node_modules/.bin/uglifyjs ./leap.js -o leap.min.js") or raise
 end

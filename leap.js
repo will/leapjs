@@ -507,6 +507,8 @@ var Frame = exports.Frame = function(data) {
   this.timestamp = data.timestamp
   this.hands = []
   this.pointables = []
+  this.tools = []
+  this.fingers = []
   var handMap = {}
   for (var handIdx = 0, handCount = data.hands.length; handIdx != handCount; handIdx++) {
     var hand = new window.Leap.Hand(data.hands[handIdx]);
@@ -515,18 +517,18 @@ var Frame = exports.Frame = function(data) {
   }
   for (var fingerIdx = 0, fingerCount = data.fingers.length; fingerIdx != fingerCount; fingerIdx++) {
     var pointable = new window.Leap.Pointable(data.fingers[fingerIdx]);
-    this.pointables.push(pointable)
+    this.pointables.push(pointable);
+    (pointable.tool ? this.tools : this.fingers).push(pointable);
     if (pointable.handId) {
       var hand = this.hands[handMap[pointable.handId]]
-      hand.pointables.push(pointable)
-      if (pointable.tool) hand.tools.push(pointable)
-      else                hand.fingers.push(pointable)
+      hand.pointables.push(pointable);
+      (pointable.tool ? hand.tools : hand.fingers).push(pointable);
     }
   }
 }
 
 Frame.prototype.finger = function(id) {
-  return (id < 0 || id >= this.fingers.length) ? window.Leap.Finger.Invalid : this.fingers[id]
+  return (id < 0 || id >= this.fingers.length) ? window.Leap.Pointable.Invalid : this.fingers[id]
 }
 
 Frame.prototype.hand = function(id) {
@@ -554,7 +556,7 @@ Frame.Invalid = {
   valid: false,
   fingers: [],
   pointables: [],
-  finger: function() { return window.Leap.Finger.Invalid },
+  finger: function() { return window.Leap.Pointable.Invalid },
   hand: function() { return window.Leap.Hand.Invalid },
   toString: function() { return "invalid frame" },
   dumpString: function() { return this.toString() }
@@ -565,14 +567,11 @@ var Hand = exports.Hand = function(data) {
   this.valid = true
   this.pointables = []
   this.fingers = []
-  this.hands = []
-  for (var fingerIdx = 0, fingerCount = data.fingers.length; fingerIdx != fingerCount; fingerIdx++) {
-    this.fingers.push(new window.Leap.Finger(data.fingers[fingerIdx]))
-  }
+  this.tools = []
 }
 
 Hand.prototype.finger = function(id) {
-  return (id < 0 || id >= this.fingers.length) ? Leap.Finger.Invalid : this.fingers[id]
+  return (id < 0 || id >= this.fingers.length) ? Leap.Pointable.Invalid : this.fingers[id]
 }
 
 Hand.prototype.toString = function() {
@@ -580,10 +579,6 @@ Hand.prototype.toString = function() {
 }
 
 Hand.Invalid = { valid: false }
-
-exports.Leap = {
-  
-}
 
 exports.loop = function(callback) {
   var controller = new Leap.Controller()
