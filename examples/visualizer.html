@@ -13,7 +13,7 @@
       var renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement); 
-      camera.position.z = 400;
+      camera.position.z = 500;
       camera.position.y = -100;
       camera.lookAt(new THREE.Vector3(0,20,0))
 
@@ -34,6 +34,7 @@
             pointer.position = origin
             pointer.setDirection(direction)
           }
+          pointer.length = pointable.length
           pointableIds[pointable.id] = true
         }
 
