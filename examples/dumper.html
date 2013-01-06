@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <script src="../leap.js"></script>
+    <script>
+      Leap.loop(function(frame) {
+        document.getElementById('out').innerHTML = "<pre>"+frame.dumpString()+"</pre>"
+      })
+    </script>
+  </head>
+  <body>
+    <div id="out"></div>
+  </body>
+</html>
