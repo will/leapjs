@@ -11,18 +11,12 @@
   })();
 
   window.Leap = {
-    ready: [],
-    loop: function(callback) {
-      var controller = new Leap.Controller()
-      controller.onReady(function() {
-        var drawCallback = function() {
-          callback(controller.lastFrame)
-          window.requestAnimFrame(drawCallback)
-        };
-        window.requestAnimFrame(drawCallback)
-      })
-    }
+    ready: []
   }
+
+  var exports = window.Leap
+
+  console.log(exports)
 
 	/*	SWFObject v2.2 <http://code.google.com/p/swfobject/> 
 	is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
@@ -420,174 +414,204 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
   
 })();
 
-	(function() {
-  var Connection = window.Leap.Connection = function(opts) {
-    if (opts && opts.frame) this.handleRawFrame = opts.frame;
-    this.connect();
-  };
+	var Connection = exports.Connection = function(opts) {
+  if (opts && opts.frame) this.handleRawFrame = opts.frame;
+};
 
-  Connection.prototype.handleOpen = function() {
-    if (this.openTimer) {
-      clearTimeout(this.openTimer);
-      this.openTimer = undefined;
+Connection.prototype.handleOpen = function() {
+  if (this.openTimer) {
+    clearTimeout(this.openTimer);
+    this.openTimer = undefined;
+  }
+};
+
+Connection.prototype.handleClose = function() {
+  var _this = this;
+  this.openTimer = setTimeout(function() { console.log("reconnecting..."); _this.connect(); }, 1000)
+};
+
+Connection.prototype.connect = function() {
+  var _this = this
+  this.socket = new WebSocket("ws://127.0.0.1:6437");
+  this.socket.onopen = function() {
+    _this.handleOpen()
+  }
+  this.socket.onmessage = function(message) {
+    _this.handleRawFrame(JSON.parse(message.data))
+  }
+  this.socket.onclose = function(message) {
+    _this.handleClose()
+  }
+}
+
+var Controller = exports.Controller = function(opts) {
+  this.opts = opts;
+  this.readyListeners = [];
+  this.frameListeners = [];
+  this.history = [];
+  this.historyIdx = 0
+  this.historyLength = 200
+  this.hasFocus = true
+  var _this = this;
+  this.lastFrame = Leap.Frame.Invalid
+  this.connection = new Leap.Connection({
+    frame: function(frame) {
+      _this.processFrame(frame)
     }
-  };
+  })
+  this.dispatchReadyEvent()
+}
 
-  Connection.prototype.handleClose = function() {
-    var _this = this;
-    this.openTimer = setTimeout(function() { console.log("reconnecting..."); _this.connect(); }, 1000)
-  };
+Controller.prototype.frame = function(num) {
+  if (!num) num = 0;
+  if (num >= this.historyLength) return new Leap.Controller.Frame.Invalid
+  var idx = (this.historyIdx - num - 1) % this.historyLength;
+  return this.history[idx];
+}
 
-  Connection.prototype.connect = function() {
-    var _this = this
-    this.socket = new WebSocket("ws://127.0.0.1:6437");
-    this.socket.onopen = function() {
-      _this.handleOpen()
-    }
-    this.socket.onmessage = function(message) {
-      _this.handleRawFrame(JSON.parse(message.data))
-    }
-    this.socket.onclose = function(message) {
-      _this.handleClose()
-    }
+Controller.prototype.onReady = function(handler) {
+  if (this.ready) {
+    handler()
+  } else {
+    this.readyListeners.push(handler);
   }
-})();
+}
 
-(function() {
-  var Controller = window.Leap.Controller = function(opts) {
-    this.opts = opts;
-    this.readyListeners = [];
-    this.frameListeners = [];
-    this.history = [];
-    this.historyIdx = 0
-    this.historyLength = 200
-    this.hasFocus = true
-    var _this = this;
-    this.connection = new Leap.Connection({
-      frame: function(frame) {
-        _this.processFrame(frame)
-      }
-    })
-    this.ready = true
-    this.dispatchReadyEvent()
+Controller.prototype.processFrame = function(frame) {
+  this.lastFrame = this.history[this.historyIdx] = new Leap.Frame(frame)
+  this.historyIdx = (this.historyIdx + 1) % this.historyLength
+  this.dispatchFrameEvent()
+}
+
+Controller.prototype.onFrame = function(handler) {
+  this.frameListeners.push(handler);
+}
+
+Controller.prototype.dispatchReadyEvent = function() {
+  this.ready = true
+  for (var readyIdx = 0, readyCount = this.readyListeners.length; readyIdx != readyCount; readyIdx++) {
+    this.readyListeners[readyIdx]();
   }
+  this.connection.connect()
+}
 
-  Controller.prototype.dispatchReadyEvent = function() {
-    for (var readyIdx = 0, readyCount = this.readyListeners.length; readyIdx != readyCount; readyIdx++) {
-      this.readyListeners[readyIdx]();
-    }
+Controller.prototype.dispatchFrameEvent = function() {
+  for (var frameIdx = 0, frameCount = this.frameListeners.length; frameIdx != frameCount; frameIdx++) {
+    this.frameListeners[frameIdx](this);
   }
+}
 
-  Controller.prototype.dispatchFrameEvent = function() {
-    for (var frameIdx = 0, frameCount = this.frameListeners.length; frameIdx != frameCount; frameIdx++) {
-      this.frameListeners[frameIdx](this);
-    }
+var Frame = exports.Frame = function(data) {
+  this.valid = true
+  this.id = data.id
+  this.timestamp = data.timestamp
+  this.hands = []
+  this.pointables = []
+  var handMap = {}
+  for (var handIdx = 0, handCount = data.hands.length; handIdx != handCount; handIdx++) {
+    var hand = new window.Leap.Hand(data.hands[handIdx]);
+    this.hands.push(hand)
+    handMap[hand.id] = handIdx
   }
-
-  Controller.prototype.processFrame = function(frame) {
-    this.lastFrame = this.history[this.historyIdx] = new Leap.Frame(frame)
-    this.historyIdx = (this.historyIdx + 1) % this.historyLength
-    this.dispatchFrameEvent()
-  }
-
-  Controller.prototype.frame = function(num) {
-    if (!num) num = 0;
-    if (num >= this.historyLength) return new Leap.Controller.Frame.Invalid
-    var idx = (this.historyIdx - num - 1) % this.historyLength;
-    return this.history[idx];
-  }
-
-  Controller.prototype.onReady = function(handler) {
-    if (this.ready) {
-      handler()
-    } else {
-      this.readyListeners.push(handler);
-    }
-  }
-
-  Controller.prototype.onFrame = function(handler) {
-    this.frameListeners.push(handler);
-  }
-})();
-// window.Leap.Controller.prototype.onConnect = function(handler) {
-//   this.connectListeners.push(handler);
-// }
-// 
-// window.Leap.Controller.prototype.onDisconnect = function(handler) {
-//   this.disconnectListeners.push(handler);
-// }
-// window.Leap.Controller.prototype.onExit = function(handler) {
-//   this.exitListeners.push(handler);
-// }
-// window.Leap.Controller.prototype.onInit = function(handler) {
-//   this.initListeners.push(handler);
-// }
-
-(function() {
-  var Finger = window.Leap.Finger = function(data) {
-    this.valid = true
-    this.id = data.id
-    this.length = data.length
-    this.tool = data.tool
-    this.width = data.width
-    this.direction = data.tip.direction
-    this.tipPosition = data.tip.position
-    this.tipVelocity = data.tip.velocity
-  }
-
-  Finger.Invalid = { valid: false }
-})();
-
-(function() {
-  var Frame = window.Leap.Frame = function(data) {
-    this.valid = true
-    this.id = data.id
-    this.timestamp = data.timestamp
-    this.hands = []
-    this.fingers = []
-    for (var handIdx = 0, handCount = data.hands.length; handIdx != handCount; handIdx++) {
-      var hand = new window.Leap.Hand(data.hands[handIdx]);
-      this.hands.push(hand)
-      for (var fingerIdx = 0, fingerCount = hand.fingers.length; fingerIdx != fingerCount; fingerIdx++) {
-        this.fingers.push(hand.fingers[fingerIdx])
-      }
+  for (var fingerIdx = 0, fingerCount = data.fingers.length; fingerIdx != fingerCount; fingerIdx++) {
+    var pointable = new window.Leap.Pointable(data.fingers[fingerIdx]);
+    this.pointables.push(pointable)
+    if (pointable.handId) {
+      var hand = this.hands[handMap[pointable.handId]]
+      hand.pointables.push(pointable)
+      if (pointable.tool) hand.tools.push(pointable)
+      else                hand.fingers.push(pointable)
     }
   }
+}
 
-  Frame.prototype.finger = function(id) {
-    return (id < 0 || id >= this.fingers.length) ? window.Leap.Finger.Invalid : this.fingers[id]
+Frame.prototype.finger = function(id) {
+  return (id < 0 || id >= this.fingers.length) ? window.Leap.Finger.Invalid : this.fingers[id]
+}
+
+Frame.prototype.hand = function(id) {
+  return (id < 0 || id >= this.hands.length) ? window.Leap.Hand.Invalid : this.hands[id]
+}
+
+Frame.prototype.toString = function() {
+  return "frame id:"+this.id+" timestamp:"+this.timestamp+" hands("+this.hands.length+") pointables("+this.pointables.length+")"
+}
+
+Frame.prototype.dumpString = function() {
+  var out = this.toString();
+  out += "\nHands:\n"
+  for (var handIdx = 0, handCount = this.hands.length; handIdx != handCount; handIdx++) {
+    out += "  "+ this.hands[handIdx].toString() + "\n"
   }
-
-  Frame.prototype.hand = function(id) {
-    return (id < 0 || id >= this.hands.length) ? window.Leap.Hand.Invalid : this.hands[id]
+  out += "Pointables:\n"
+    for (var pointableIdx = 0, pointableCount = this.pointables.length; pointableIdx != pointableCount; pointableIdx++) {
+    out += "  "+ this.pointables[pointableIdx].toString() + "\n"
   }
+  return out;
+}
 
-  Frame.Invalid = {
-    valid: false,
-    fingers: [],
-    hands: [],
-    finger: function() { return window.Leap.Finger.Invalid },
-    hand: function() { return window.Leap.Hand.Invalid }
+Frame.Invalid = {
+  valid: false,
+  fingers: [],
+  pointables: [],
+  finger: function() { return window.Leap.Finger.Invalid },
+  hand: function() { return window.Leap.Hand.Invalid },
+  toString: function() { return "invalid frame" },
+  dumpString: function() { return this.toString() }
+}
+var Hand = exports.Hand = function(data) {
+  this.data = data;
+  this.id = data.id
+  this.valid = true
+  this.pointables = []
+  this.fingers = []
+  this.hands = []
+  for (var fingerIdx = 0, fingerCount = data.fingers.length; fingerIdx != fingerCount; fingerIdx++) {
+    this.fingers.push(new window.Leap.Finger(data.fingers[fingerIdx]))
   }
-})();
+}
 
-(function() {
-  var Hand = window.Leap.Hand = function(data) {
-    this.id = data.id
-    this.valid = true
-    this.fingers = []
-    for (var fingerIdx = 0, fingerCount = data.fingers.length; fingerIdx != fingerCount; fingerIdx++) {
-      this.fingers.push(new window.Leap.Finger(data.fingers[fingerIdx]))
-    }
-  }
+Hand.prototype.finger = function(id) {
+  return (id < 0 || id >= this.fingers.length) ? Leap.Finger.Invalid : this.fingers[id]
+}
 
-  Hand.prototype.finger = function(id) {
-    return (id < 0 || id >= this.fingers.length) ? window.Leap.Finger.Invalid : this.fingers[id]
-  }
+Hand.prototype.toString = function() {
+  return "Hand [ id: "+ this.id + " data:"+this.data+"] ";
+}
 
-  Hand.Invalid = { valid: false }
-})();
+Hand.Invalid = { valid: false }
 
+exports.Leap = {
+  
+}
+
+exports.loop = function(callback) {
+  var controller = new Leap.Controller()
+  controller.onReady(function() {
+    var drawCallback = function() {
+      callback(controller.lastFrame)
+      window.requestAnimFrame(drawCallback)
+    };
+    window.requestAnimFrame(drawCallback)
+  })
+}
+
+var Pointable = exports.Pointable = function(data) {
+  this.valid = true
+  this.id = data.id
+  this.length = data.length
+  this.tool = data.tool
+  this.width = data.width
+  this.direction = data.tip.direction
+  this.tipPosition = data.tip.position
+  this.tipVelocity = data.tip.velocity
+}
+
+Pointable.prototype.toString = function() {
+  return "pointable id:" + this.id + " " + this.length + "mmx" + this.width + "mm " + this.direction;
+}
+
+Pointable.Invalid = { valid: false }
 
 
 	for (var readyIdx in Leap.ready) {
