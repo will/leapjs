@@ -545,7 +545,7 @@ Frame.prototype.toString = function() {
   return "frame id:"+this.id+" timestamp:"+this.timestamp+" hands("+this.hands.length+") pointables("+this.pointables.length+")"
 }
 
-Frame.prototype.dumpString = function() {
+Frame.prototype.dump = function() {
   var out = this.toString();
   out += "\nHands:\n"
   for (var handIdx = 0, handCount = this.hands.length; handIdx != handCount; handIdx++) {
@@ -565,7 +565,7 @@ Frame.Invalid = {
   finger: function() { return window.Leap.Pointable.Invalid },
   hand: function() { return window.Leap.Hand.Invalid },
   toString: function() { return "invalid frame" },
-  dumpString: function() { return this.toString() }
+  dump: function() { return this.toString() }
 }
 var Hand = exports.Hand = function(data) {
   this.data = data;
@@ -581,7 +581,7 @@ Hand.prototype.finger = function(id) {
 }
 
 Hand.prototype.toString = function() {
-  return "Hand [ id: "+ this.id + " data:"+this.data+"] ";
+  return "Hand [ id: "+ this.id + " data:"+JSON.stringify(this.data)+"] ";
 }
 
 Hand.Invalid = { valid: false }

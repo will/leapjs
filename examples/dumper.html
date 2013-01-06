@@ -2,12 +2,20 @@
   <head>
     <script src="../leap.js"></script>
     <script>
+      var latestFrame = null;
+      window.onkeypress = function(e) {
+        if (e.charCode == 32) {
+          document.getElementById('log').innerHTML += ("<div>" +(new Date()).toString() + "<br><pre>" + latestFrame.dump() + "</pre></div>")
+        }
+      }
       Leap.loop(function(frame) {
-        document.getElementById('out').innerHTML = "<pre>"+frame.dumpString()+"</pre>"
+        latestFrame = frame
+        document.getElementById('out').innerHTML = "<pre>"+frame.dump()+"</pre>"
       })
     </script>
   </head>
   <body>
     <div id="out"></div>
+    <div id="log"></div>
   </body>
 </html>
