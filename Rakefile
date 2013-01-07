@@ -9,7 +9,7 @@ def load_file(path)
 end
 
 task :test => :build do
-  exec "./node_modules/.bin/mocha-phantomjs test.html"
+  exec "./node_modules/.bin/mocha-phantomjs test/runner.html"
 end
 
 task :build do

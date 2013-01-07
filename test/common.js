@@ -7,7 +7,7 @@ fakeFrame = function(opts) {
   return {
     id: ++frameId,
     timestamp: frameId,
-    fingers: _(opts.fingers || 0).times(function() { return fakeFinger() }),
+    pointables: _(opts.fingers || 0).times(function() { return fakeFinger() }),
     hands: _(opts.hands || 0).times(function() { return fakeHand() })
   }
 }

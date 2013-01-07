@@ -521,8 +521,8 @@ var Frame = exports.Frame = function(data) {
     this.hands.push(hand)
     handMap[hand.id] = handIdx
   }
-  for (var fingerIdx = 0, fingerCount = data.fingers.length; fingerIdx != fingerCount; fingerIdx++) {
-    var pointable = new window.Leap.Pointable(data.fingers[fingerIdx]);
+  for (var pointableIdx = 0, pointableCount = data.pointables.length; pointableIdx != pointableCount; pointableIdx++) {
+    var pointable = new window.Leap.Pointable(data.pointables[pointableIdx]);
     this.pointables.push(pointable);
     (pointable.tool ? this.tools : this.fingers).push(pointable);
     if (pointable.handId) {
@@ -531,6 +531,14 @@ var Frame = exports.Frame = function(data) {
       (pointable.tool ? hand.tools : hand.fingers).push(pointable);
     }
   }
+}
+
+Frame.prototype.tool = function(id) {
+  return (id < 0 || id >= this.tools.length) ? window.Leap.Pointable.Invalid : this.tools[id]
+}
+
+Frame.prototype.pointable = function(id) {
+  return (id < 0 || id >= this.pointables.length) ? window.Leap.Pointable.Invalid : this.pointables[id]
 }
 
 Frame.prototype.finger = function(id) {
@@ -568,8 +576,13 @@ Frame.Invalid = {
   dump: function() { return this.toString() }
 }
 var Hand = exports.Hand = function(data) {
-  this.data = data;
   this.id = data.id
+  this.palmPosition = data.palmPosition
+  this.palmDirection = data.palmDirection
+  this.palmVelocity = data.palmVelocity
+  this.palmNormal = data.palmNormal
+  this.sphereCenter = data.sphereCenter
+  this.sphereRadius = data.sphereRadius
   this.valid = true
   this.pointables = []
   this.fingers = []
