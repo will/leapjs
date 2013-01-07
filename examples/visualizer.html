@@ -25,7 +25,7 @@
         for (var pointableId = 0, pointableCount = frame.pointables.length; pointableId != pointableCount; pointableId++) {
           var pointable = frame.pointables[pointableId];
           var finger = fingers[pointable.id]
-          var origin = new THREE.Vector3(pointable.tipPosition[0], pointable.tipPosition[1], pointable.tipPosition[2])
+          var origin = new THREE.Vector3(pointable.tipPosition[0], pointable.tipPosition[1], -pointable.tipPosition[2])
           var direction = new THREE.Vector3(pointable.direction[0], pointable.direction[1], -pointable.direction[2]);
           if (!finger) {
             finger = new THREE.ArrowHelper(origin, direction, pointable.length, Math.random() * 0xffffff);
