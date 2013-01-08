@@ -16,8 +16,6 @@
 
   var exports = window.Leap
 
-  console.log(exports)
-
 	/*	SWFObject v2.2 <http://code.google.com/p/swfobject/> 
 	is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
 */
@@ -430,17 +428,21 @@ Connection.prototype.handleClose = function() {
   this.openTimer = setTimeout(function() { console.log("reconnecting..."); _this.connect(); }, 1000)
 };
 
+Connection.prototype.createSocket = function() {
+  this.socket = new WebSocket("ws://127.0.0.1:6437");
+}
+
 Connection.prototype.connect = function() {
   var _this = this
-  this.socket = new WebSocket("ws://127.0.0.1:6437");
+  if (!this.socket) this.createSocket()
   this.socket.onopen = function() {
     _this.handleOpen()
   }
   this.socket.onmessage = function(message) {
     var data = JSON.parse(message.data);
     if (data.version) {
-      console.log("version:"+data.version)
       _this.serverVersion = data.version
+      if (_this.startConnection) _this.startConnection(_this.serverVersion)
     } else {
       _this.handleRawFrame(data)
     }
