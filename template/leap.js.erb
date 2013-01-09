@@ -11,10 +11,20 @@
   })();
 
   window.Leap = {
-    ready: []
+    ready: [],
+    extend: function(destination, source) {
+      for (var k in source) {
+        if (source.hasOwnProperty(k)) {
+          destination[k] = source[k];
+        }
+      }
+      return destination; 
+    }
   }
 
   var exports = window.Leap
+
+
 
 	<%= load_file("./websocketjs/swfobject.js") %>
 	<%= load_file("./websocketjs/web_socket.js") %>

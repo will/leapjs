@@ -11,10 +11,20 @@
   })();
 
   window.Leap = {
-    ready: []
+    ready: [],
+    extend: function(destination, source) {
+      for (var k in source) {
+        if (source.hasOwnProperty(k)) {
+          destination[k] = source[k];
+        }
+      }
+      return destination; 
+    }
   }
 
   var exports = window.Leap
+
+
 
 	/*	SWFObject v2.2 <http://code.google.com/p/swfobject/> 
 	is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
@@ -542,48 +552,7 @@ var Frame = exports.Frame = function(data) {
       (pointable.tool ? hand.tools : hand.fingers).push(pointable);
     }
   }
-}
-
-Frame.epsilon = Math.pow(1, -16);
-
-Frame.prototype.matrix = function() {
-  if (this.matrix) return this.matrix;
-  return this.matrix = $M(this.rotation);
-}
-
-Frame.prototype.translation = function(fromFrame) {
-  if (fromFrame === undefined) return this.translation;
-  if (!this.fromFrame.valid || !fromFrame.valid) return {x:0, y:0, z:0};
-  return { x: this._translation.x - fromFrame._translation.x,
-           y: this._translation.y - fromFrame._translation.y,
-           z: this._translation.z - fromFrame._translation.z };
-}
-
-Frame.prototype.rotationAxis = function(fromFrame) {
-  if (!this.fromFrame.valid || !fromFrame.valid) return {x:0, y:0, z:0};
-  return this.normalize({ x: this.zBasis[1] - fromFrame.yBasis[2],
-           y: this.xBasis[2] - fromFrame.zBasis[0],
-           z: this.yBasis[0] - fromFrame.xBasis[1] });
-}
-
-Frame.prototype.rotationAngle = function(fromFrame) {
-  if (!this.fromFrame.valid || !fromFrame.valid) return 0.0;
-  var cs = (fromFrame.xBasis[0] + fromFrame.yBasis[1] + fromFrame.zBasis[2] - 1.0)*0.5;
-  if (cs < epsilon - 1.0 || cs > epsilon + 1.0) {
-    return 0.0;
-  } else {
-    return Math.acos(cs);
-  }
-}
-
-Frame.prototype.rotationMatrix = function(fromFrame) {
-  if (!this.fromFrame.valid || !fromFrame.valid) $M.I(3);
-  return fromFrame.matrix().x(this.matrix().transpose())
-}
-
-Frame.prototype.scaleFactor = function(fromFrame) {
-  if (!this.fromFrame.valid || !fromFrame.valid) 1.0;
-  return Math.exp(this._scaleFactor - fromFrame._scaleFactor);
+  Leap.extend(Frame.prototype, Motion)
 }
 
 Frame.prototype.tool = function(id) {
@@ -663,6 +632,45 @@ exports.loop = function(callback) {
     };
     window.requestAnimFrame(drawCallback)
   })
+}
+
+var epsilon = Math.pow(1, -16);
+
+var Motion = exports.Motion = {
+  matrix: function() {
+    if (this.matrix) return this.matrix;
+    return this.matrix = $M(this.rotation);
+  },
+  translation: function(fromFrame) {
+    if (fromFrame === undefined) return this.translation;
+    if (!this.fromFrame.valid || !fromFrame.valid) return {x:0, y:0, z:0};
+    return { x: this._translation.x - fromFrame._translation.x,
+             y: this._translation.y - fromFrame._translation.y,
+             z: this._translation.z - fromFrame._translation.z };
+  },
+  rotationAxis: function(fromFrame) {
+    if (!this.fromFrame.valid || !fromFrame.valid) return {x:0, y:0, z:0};
+    return this.normalize({ x: this.zBasis[1] - fromFrame.yBasis[2],
+             y: this.xBasis[2] - fromFrame.zBasis[0],
+             z: this.yBasis[0] - fromFrame.xBasis[1] });
+  },
+  rotationAngle: function(fromFrame) {
+    if (!this.fromFrame.valid || !fromFrame.valid) return 0.0;
+    var cs = (fromFrame.xBasis[0] + fromFrame.yBasis[1] + fromFrame.zBasis[2] - 1.0)*0.5;
+    if (cs < epsilon - 1.0 || cs > epsilon + 1.0) {
+      return 0.0;
+    } else {
+      return Math.acos(cs);
+    }
+  },
+  rotationMatrix: function(fromFrame) {
+    if (!this.fromFrame.valid || !fromFrame.valid) $M.I(3);
+    return fromFrame.matrix().x(this.matrix().transpose())
+  },
+  scaleFactor: function(fromFrame) {
+    if (!this.fromFrame.valid || !fromFrame.valid) 1.0;
+    return Math.exp(this._scaleFactor - fromFrame._scaleFactor);
+  }
 }
 
 var Pointable = exports.Pointable = function(data) {
