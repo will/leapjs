@@ -2,7 +2,7 @@ require 'erb'
 
 def load_file(path)
   raise "nothing at #{path}" if Dir[path].empty?
-  files = Dir[path].map do |f|
+  files = Dir[path].to_a.sort.map do |f|
     File.read(f)
   end
   files.join("\n")
