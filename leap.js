@@ -529,9 +529,6 @@ var Frame = exports.Frame = function(data) {
   this.fingers = []
   this._translation = data.translation;
   this.rotation = data.rotation;
-  this.xBasis = this.rotation[0];
-  this.yBasis = this.rotation[1];
-  this.zBasis = this.rotation[2];
   this._scaleFactor = data.scaleFactor;
   var handMap = {}
   for (var handIdx = 0, handCount = data.hands.length; handIdx != handCount; handIdx++) {
@@ -610,9 +607,6 @@ var Hand = exports.Hand = function(data) {
   this.tools = []
   this._translation = data.translation;
   this.rotation = data.rotation;
-  this.xBasis = this.rotation[0];
-  this.yBasis = this.rotation[1];
-  this.zBasis = this.rotation[2];
   this._scaleFactor = data.scaleFactor;
   Leap.extend(Frame.prototype, Motion)
 }
@@ -654,13 +648,13 @@ var Motion = exports.Motion = {
   },
   rotationAxis: function(fromFrame) {
     if (!this.fromFrame.valid || !fromFrame.valid) return {x:0, y:0, z:0};
-    return this.normalize({ x: this.zBasis[1] - fromFrame.yBasis[2],
-             y: this.xBasis[2] - fromFrame.zBasis[0],
-             z: this.yBasis[0] - fromFrame.xBasis[1] });
+    return this.normalize({ x: this.rotation[2][1] - fromFrame.rotation[1][2],
+             y: this.rotation[0][2] - fromFrame.rotation[2][0],
+             z: this.rotation[1][0] - fromFrame.rotation[0][1] });
   },
   rotationAngle: function(fromFrame) {
     if (!this.fromFrame.valid || !fromFrame.valid) return 0.0;
-    var cs = (fromFrame.xBasis[0] + fromFrame.yBasis[1] + fromFrame.zBasis[2] - 1.0)*0.5;
+    var cs = (fromFrame.rotation[0][0] + fromFrame.rotation[1][1] + fromFrame.rotation[2][2] - 1.0)*0.5;
     if (cs < epsilon - 1.0 || cs > epsilon + 1.0) {
       return 0.0;
     } else {
