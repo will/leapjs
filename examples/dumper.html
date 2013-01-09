@@ -2,15 +2,20 @@
   <head>
     <script src="../leap.js"></script>
     <script>
+      var pausedFrame = null;
       var latestFrame = null;
       window.onkeypress = function(e) {
         if (e.charCode == 32) {
-          document.getElementById('log').innerHTML += ("<div>" +(new Date()).toString() + "<br><pre>" + latestFrame.dump() + "</pre></div>")
+          if (pausedFrame == null) {
+            pausedFrame = latestFrame
+          } else {
+            pausedFrame = null;
+          }
         }
       }
       Leap.loop(function(frame) {
         latestFrame = frame
-        document.getElementById('out').innerHTML = "<pre>"+frame.dump()+"</pre>"
+        document.getElementById('out').innerHTML = (pausedFrame ? "<p><b>PAUSED</b></p>" : "") + "<pre>"+(pausedFrame || latestFrame).dump()+"</pre>"
       })
     </script>
   </head>
