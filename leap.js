@@ -420,7 +420,8 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
 })();
 
 	var Connection = exports.Connection = function(opts) {
-  if (opts && opts.frame) this.handleRawFrame = opts.frame;
+  if (opts && opts.frame) this.frameHandler = opts.frame;
+  if (opts && opts.ready) this.readyHandler = opts.ready;
 };
 
 Connection.prototype.handleOpen = function() {
@@ -440,22 +441,24 @@ Connection.prototype.createSocket = function() {
 }
 
 Connection.prototype.connect = function() {
-  var _this = this
-  if (!this.socket) this.createSocket()
-  this.socket.onopen = function() {
-    _this.handleOpen()
-  }
-  this.socket.onmessage = function(message) {
-    var data = JSON.parse(message.data);
-    if (data.version) {
-      _this.serverVersion = data.version
-      if (_this.startConnection) _this.startConnection(_this.serverVersion)
-    } else {
-      _this.handleRawFrame(data)
+  if (!this.socket) {
+    var _this = this
+    this.createSocket()
+    this.socket.onopen = function() {
+      _this.handleOpen()
     }
-  }
-  this.socket.onclose = function(message) {
-    _this.handleClose()
+    this.socket.onmessage = function(message) {
+      var data = JSON.parse(message.data);
+      if (data.version) {
+        _this.serverVersion = data.version
+        if (_this.readyHandler) _this.readyHandler(_this.serverVersion)
+      } else {
+        if (_this.frameHandler) _this.frameHandler(new Frame(data))
+      }
+    }
+    this.socket.onclose = function(message) {
+      _this.handleClose()
+    }
   }
 }
 
@@ -467,15 +470,22 @@ var Controller = exports.Controller = function(opts) {
   this.historyIdx = 0
   this.historyLength = 200
   this.hasFocus = true
-  var _this = this;
+  var controller = this;
   this.lastFrame = Leap.Frame.Invalid
   this.lastValidFrame = Leap.Frame.Invalid
   this.connection = new Leap.Connection({
+    conenct: function(version) {
+      controller.version = version
+      this.dispatchReadyEvent();      
+    },
     frame: function(frame) {
-      _this.processFrame(frame)
+      controller.processFrame(frame)
     }
   })
-  this.dispatchReadyEvent()
+}
+
+Controller.prototype.connect = function() {
+  this.connection.connect();
 }
 
 Controller.prototype.frame = function(num) {
@@ -494,7 +504,7 @@ Controller.prototype.onReady = function(handler) {
 }
 
 Controller.prototype.processFrame = function(frame) {
-  this.lastFrame = this.history[this.historyIdx] = new Leap.Frame(frame)
+  this.lastFrame = this.history[this.historyIdx] = frame
   // TODO add test for lastValidFrame
   if (this.lastFrame.valid) this.lastValidFrame = this.lastFrame;
   this.historyIdx = (this.historyIdx + 1) % this.historyLength

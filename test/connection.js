@@ -7,8 +7,8 @@ describe('Connection', function(){
       }})
       connection.createSocket = function() { this.socket = { } }
       connection.connect()
-      connection.socket.onmessage({data: JSON.stringify({id:123})})
-      assert.deepEqual({id:123}, frame)
+      connection.socket.onmessage({data: JSON.stringify(fakeFrame({id:123}))})
+      assert.equal(123, frame.id)
     })
   })
 })

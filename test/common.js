@@ -6,7 +6,7 @@ var fakeFrame = function(opts) {
   if (opts === undefined) opts = {};
 
   return {
-    id: ++frameId,
+    id: opts.id || ++frameId,
     valid: true,
     timestamp: frameId,
     pointables: _(opts.fingers || 0).times(function() { return fakeFinger() }),
