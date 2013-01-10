@@ -29,4 +29,15 @@ describe('Motion', function(){
       assert.closeTo(Math.sqrt(2)/2, result.z, 0.0001)
     })
   })
+
+  describe('#rotationAngle()', function(){
+    it('should return the rotationAngle', function(){
+      var data1 = fakeFrame({rotation: [[1.0,0.0,0.0], [0.0,1.0,0.0], [0.0,0.0,1.0]]})
+      var frame1 = new window.Leap.Frame(data1);
+      var data2 = fakeFrame({rotation: [[1.0,0.0,0.0], [0.0,1.0,0.0], [0.5,0.0,0.5]]})
+      var frame2 = new window.Leap.Frame(data2);
+      var result = frame1.rotationAngle(frame2);
+      assert.closeTo(0.72273, result, 0.0001)
+    })
+  })
 })
