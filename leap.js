@@ -594,7 +594,6 @@ Frame.Invalid = {
 }
 var Hand = exports.Hand = function(data) {
   this.id = data.id
-  this.data = data;
   this.palmPosition = data.palmPosition
   this.palmDirection = data.palmDirection
   this.palmVelocity = data.palmVelocity
@@ -608,7 +607,7 @@ var Hand = exports.Hand = function(data) {
   this._translation = data.translation;
   this.rotation = data.rotation;
   this._scaleFactor = data.scaleFactor;
-  Leap.extend(Frame.prototype, Motion)
+  Leap.extend(Hand.prototype, Motion)
 }
 
 Hand.prototype.finger = function(id) {
