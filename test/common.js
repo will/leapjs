@@ -11,8 +11,8 @@ var fakeFrame = function(opts) {
     timestamp: frameId,
     pointables: _(opts.fingers || 0).times(function() { return fakeFinger() }),
     hands: opts.handData || _(opts.hands || 0).times(function() { return fakeHand() }),
-    rotation: opts.rotation || [[0,1,2], [2,3,4], [2,3,4]],
-    translation: opts.translation || [1, 2, 3],
+    r: opts.rotation || [[0,1,2], [2,3,4], [2,3,4]],
+    t: opts.translation || [1, 2, 3],
   }
 }
 
@@ -21,8 +21,8 @@ var fakeHand = function(opts) {
     id: ++handId,
     valid: true,
     palm: [],
-    rotation: (opts && opts.rotation) || [[0,1,2], [2,3,4], [2,3,4]],
-    translation: (opts && opts.translation) || [1, 2, 3]
+    r: (opts && opts.rotation) || [[0,1,2], [2,3,4], [2,3,4]],
+    t: (opts && opts.translation) || [1, 2, 3]
   }
 }
 
