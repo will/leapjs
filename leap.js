@@ -474,9 +474,9 @@ var Controller = exports.Controller = function(opts) {
   this.lastFrame = Leap.Frame.Invalid
   this.lastValidFrame = Leap.Frame.Invalid
   this.connection = new Leap.Connection({
-    conenct: function(version) {
-      controller.version = version
-      this.dispatchReadyEvent();      
+    ready: function(version) {
+      controller.version = version;
+      controller.dispatchReadyEvent();
     },
     frame: function(frame) {
       controller.processFrame(frame)
@@ -639,6 +639,7 @@ exports.loop = function(callback) {
     };
     window.requestAnimFrame(drawCallback)
   })
+  controller.connect()
 }
 
 var Vec3 = function(opts) {
