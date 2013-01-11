@@ -39,9 +39,9 @@
           var r = firstValidFrame.rotationAxis(frame);
           //camera.rotation.set( r.x, r.y, r.z );
 
-          camera.position.x = t.x + startX;
-          camera.position.y = t.y + startY;
-          camera.position.z = t.z + startZ;
+          camera.position.x = t.x * 10 + startX;
+          camera.position.y = t.y * 10  + startY;
+          camera.position.z = t.z * 10  + startZ;
         }
         renderer.render(scene, camera);
       });
