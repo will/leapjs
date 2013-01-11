@@ -668,10 +668,12 @@ var Motion = exports.Motion = {
     return this._matrix = $M(this.rotation);
   },
   translation: function(fromFrame) {
-    if (!this.valid || !fromFrame.valid) return new Vec3();
-    return new Vec3({x: this._translation.x - fromFrame._translation.x,
-                 y: this._translation.y - fromFrame._translation.y,
-                 z: this._translation.z - fromFrame._translation.z });
+    if (!this.valid || !fromFrame.valid) {
+      return new Vec3();
+    }
+    return new Vec3({x: this._translation[0] - fromFrame._translation[0],
+                 y: this._translation[1] - fromFrame._translation[1],
+                 z: this._translation[2] - fromFrame._translation[2] });
   },
   rotationAxis: function(fromFrame) {
     if (!this.valid || !fromFrame.valid) return {x:0, y:0, z:0};

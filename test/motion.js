@@ -10,9 +10,9 @@ describe('Motion', function(){
 
     describe('#translation()', function(){
       it('should return the translation', function(){
-        var data1 = fakeFrame({translation: {x: 1,y: 2, z:3}})
+        var data1 = fakeFrame({translation: [1, 2, 3]})
         var frame1 = new window.Leap.Frame(data1);
-        var data2 = fakeFrame({translation: {x: 3,y: 1, z:5}})
+        var data2 = fakeFrame({translation: [3, 1, 5]})
         var frame2 = new window.Leap.Frame(data2);
         assert.deepEqual({x:-2, y:1, z:-2}, frame1.translation(frame2))
       })
@@ -54,9 +54,9 @@ describe('Motion', function(){
 
     describe('#translation()', function(){
       it('should return the translation', function(){
-        var data1 = fakeFrame({handData: [fakeHand({translation: {x: 1,y: 2, z:3}})]})
+        var data1 = fakeFrame({handData: [fakeHand({translation: [1, 2, 3]})]})
         var frame1 = new window.Leap.Frame(data1);
-        var data2 = fakeFrame({handData: [fakeHand({translation: {x: 3,y: 1, z:5}})]})
+        var data2 = fakeFrame({handData: [fakeHand({translation: [3, 1, 5]})]})
         var frame2 = new window.Leap.Frame(data2);
         assert.deepEqual({x:-2, y:1, z:-2}, frame1.hand(0).translation(frame2.hand(0)))
       })
