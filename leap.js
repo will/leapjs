@@ -543,11 +543,13 @@ var Frame = exports.Frame = function(data) {
   var handMap = {}
   for (var handIdx = 0, handCount = data.hands.length; handIdx != handCount; handIdx++) {
     var hand = new window.Leap.Hand(data.hands[handIdx]);
+    hand.frame = this;
     this.hands.push(hand)
     handMap[hand.id] = handIdx
   }
   for (var pointableIdx = 0, pointableCount = data.pointables.length; pointableIdx != pointableCount; pointableIdx++) {
     var pointable = new window.Leap.Pointable(data.pointables[pointableIdx]);
+    pointable.frame = this;
     this.pointables.push(pointable);
     (pointable.tool ? this.tools : this.fingers).push(pointable);
     if (pointable.handId) {
@@ -595,6 +597,7 @@ Frame.prototype.dump = function() {
 
 Frame.Invalid = {
   valid: false,
+  hands: [],
   fingers: [],
   pointables: [],
   finger: function() { return window.Leap.Pointable.Invalid },
@@ -630,16 +633,23 @@ Hand.prototype.toString = function() {
 
 Hand.Invalid = { valid: false }
 
+var loopController = null
+
 exports.loop = function(callback) {
-  var controller = new Leap.Controller()
-  controller.onReady(function() {
+  if (loopController) {
+    loopController.connect.disconnect();
+    loopController = null
+  }
+
+  loopController = new Leap.Controller()
+  loopController.onReady(function() {
     var drawCallback = function() {
-      callback(controller.lastFrame)
+      callback(loopController.lastFrame)
       window.requestAnimFrame(drawCallback)
     };
     window.requestAnimFrame(drawCallback)
   })
-  controller.connect()
+  loopController.connect()
 }
 
 var multiply = function(vec, c) {
@@ -699,13 +709,44 @@ var Pointable = exports.Pointable = function(data) {
   this.direction = data.direction
   this.tipPosition = data.tipPosition
   this.tipVelocity = data.tipVelocity
+  this._translation = data.tipPosition
 }
 
 Pointable.prototype.toString = function() {
   return "pointable id:" + this.id + " " + this.length + "mmx" + this.width + "mm " + this.direction;
 }
 
+Pointable.prototype.translation = Motion.translation;
+
 Pointable.Invalid = { valid: false }
+
+var Screen = exports.Screen = function(input, opts) {
+  if (input.clientWidth && input.clientHeight) {
+    this.width = input.clientWidth
+    this.height = input.clientHeight
+  } else {
+    this.width = input[0]
+    this.height = input[1]
+  }
+  var size = opts && opts.size ? opts.size : 5
+  var max = Math.max(this.width, this.height);
+  this.isX = (this.width / max) * size;
+  this.isY = (this.height / max) * size;
+}
+
+Screen.prototype.translate = function(vec) {
+  var x = vec[0], y = vec[1], z = vec[2];
+  if (x + this.isX < 0) x = -this.isX;
+  if (y + this.isY < 0) y = -this.isY;
+  if (x - this.isX > 0) x = this.isX;
+  if (y - this.isY > 0) y = this.isY;
+
+  return [
+    Math.round(((x + this.isX) / (this.isX * 2)) * el.clientWidth),
+    Math.round(((this.isY - y) / (this.isY * 2)) * el.clientHeight),
+    z
+  ];
+}
 
 // === Sylvester ===
 // Vector and Matrix mathematics modules for JavaScript
@@ -1961,6 +2002,48 @@ var $V = Vector.create;
 var $M = Matrix.create;
 var $L = Line.create;
 var $P = Plane.create;
+
+var UI = exports.UI = {
+  Cursor: function(screen) {
+    this.screen = screen;
+    this.referenceFrame = null;
+    this.ttl = null;
+    this.x = 0;
+    this.y = 0;
+  }
+}
+
+UI.Cursor.prototype.onKill = function() {};
+UI.Cursor.prototype.onCreate = function() {};
+UI.Cursor.prototype.onMove = function() {};
+
+UI.Cursor.prototype.update = function(frame) {
+  if (this.ttl) {
+    // calculate the relative co-ords and report to div
+    // nothing to track ...
+    if (frame.hands.length + frame.pointables.length == 0) {
+      // and kill the cursor here
+      if (this.ttl > (new Date()).getTime()) {
+        console.log("killing cursor")
+        this.ttl = null
+        this.onKill()
+      }
+    } else {
+      // there must be something to track
+      this.ttl = (new Date()).getTime() + 1000;
+      var translation = this.screen.translate(frame.translation(this.referenceFrame))
+      this.onMove({x: translation[0], y: translation[1]})
+    }
+  } else {
+    if (frame.hands.length + frame.pointables.length > 0) {
+      this.ttl = (new Date()).getTime() + 1000;
+      this.referenceFrame = frame;
+      this.onCreate()
+    }
+  }
+
+}
+
 
 
 	for (var readyIdx in Leap.ready) {
