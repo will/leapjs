@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Leap Motion JavaScript API Reference: Class: Controller</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-jsdoc.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Class: Controller</h1>
+    
+    
+
+
+
+<section>
+    
+<header>
+    <h2>
+    Controller
+    </h2>
+    
+        <div class="class-description"><p>The Controller object manages the connection to the Leap. Depending on how<br />you use the LeapJS library, you may or may not interact with a controller<br />object directly.</p>
+
+<p>You can get the most recent frame of Leap data from a Controller object at<br />any time with the frame() method. If your application has a natural fame<br />rate, an efficient strategy is to call the frame() method during your<br />application's update loop. (This is the strategy used by the Leap.loop()<br />mechanism.)</p>
+
+<p><strong>Using an implicit Controller</strong></p>
+
+<p>If you use the <a href="Leap.html#loop">Leap.loop</a>() mechanism, a Controller is created for<br />you in the background.</p>
+
+<div class="highlight"><pre lang="javascript">   Leap.loop( function( frame ) {
+       // ... your code here
+   })
+</pre></div>
+
+<p>The loop function creates the controller, establishes the<br />connection to the Leap application and calls your handler function on the<br />browser's animation interval (using window.requestAnimationFrame()).</p>
+
+<p><strong>Using an explicit Controller</strong><br />If you don't use Leap.loop, create and connect your own Controller as<br />follows:</p>
+
+<ol>
+<li>Create a Controller object: var controller = new Leap.Controller()</li>
+<li><p>Optionally, add callback functions:</p>
+
+<ul><li>onReady handlers are called when the controller is connected.</li>
+<li>onFrame handlers are called when a new Frame is available.</li></ul>
+
+<p>Note that the Leap frame rate can exceed 200 frames per second, depending<br />on the operating mode of the Leap application. Take care when using the<br />onFrame handler mechanism to avoid taking too much processing time away<br />from other parts of your application.</p></li>
+<li>Call the Controller connect() method.</li>
+<li>If you are not using onFrame handlers, call Controller.frame() whenever
+your application is ready to process a set of Leap tracking data (for
+example, in the update handler of an animation loop).</li>
+</ol></div>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+<dt>
+    <h4 class="name" id="Controller"><span class="type-signature"></span>new Controller<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Constructs a Controller object.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>controller.js, line 1</li></ul></dd>
+	
+    
+    
+	
+	
+	
+	
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>   var controller = new Leap.Controller();
+   controller.onFrame(function() {
+       console.log("hello")
+       console.log(controller.frame().id)
+       console.log(controller.frame().fingers.length)
+       console.log(controller.frame().finger(0))
+   })
+   controller.connect()</code></pre>
+
+    
+</dd>
+
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl>
+            
+<dt>
+    <h4 class="name" id="connect"><span class="type-signature"></span>connect<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Connects to the Leap application through a WebSocket connection.</p>
+
+<p>When the connection is successful, the controller invokes any queued<br />onReady handlers.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>controller.js, line 79</li></ul></dd>
+	
+    
+    
+	
+	
+	
+	
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="frame"><span class="type-signature"></span>frame<span class="signature">(num)</span><span class="type-signature"> &rarr; {Frame}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns a frame of tracking data from the Leap. Use the optional<br />history parameter to specify which frame to retrieve. Call frame() or<br />frame(0) to access the most recent frame; call frame(1) to access the<br />previous frame, and so on. If you use a history value greater than the<br />number of stored frames, then the controller returns an invalid frame.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>num</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Integer</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The age of the frame to return, counting backwards from<br />the most recent frame (0) into the past and up to the maximum age (59).</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>controller.js, line 91</li></ul></dd>
+	
+    
+    
+	
+	
+	
+	
+</dl>
+
+    
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>The specified frame; or, if no history parameter is specified,<br />the newest frame. If a frame is not available at the specified history<br />position, an invalid Frame is returned.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Frame</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="onFrame"><span class="type-signature"></span>onFrame<span class="signature">(handler)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Assigns a handler function to be called when the Controller object receives<br />a frame from the Leap software. Every assigned handler function is pushed<br />into a queue and called for each frame. Removing handlers from the queue is<br />not supported.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>A function to be called for each frame of Leap data.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>controller.js, line 129</li></ul></dd>
+	
+    
+    
+	
+	
+	
+	
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="onReady"><span class="type-signature"></span>onReady<span class="signature">(handler)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Assigns a handler function to be called when the Controller object connects<br />to the Leap software. The handler is called immediately if the controller is<br />already connected. Otherwise, the handler function is put in a queue to<br />be called later.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>A function to be called when the controller is ready.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>controller.js, line 112</li></ul></dd>
+	
+    
+    
+	
+	
+	
+	
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Leap.Controller.html">Controller</a></li><li><a href="Leap.Frame.html">Frame</a></li><li><a href="Leap.Hand.html">Hand</a></li><li><a href="Leap.Pointable.html">Pointable</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Copyright &copy; 2012-2013 <a href="https://developer.leapmotion.com">Leap Motion</a>
+</footer>
+
+<script> prettyPrint(); </script>
+</body>
+</html>

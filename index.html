@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Leap Motion JavaScript API Reference: Index</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-jsdoc.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Index</h1>
+    
+    
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Leap JavaScript Client Library</h1>
+
+<p>Leap JS is a JavaScript client library that lets you use Leap motion tracking data in a web application.</p>
+
+<p>In a nutshell, the Leap motion tracking device detects and tracks hands and fingers placed within its field of view. The Leap captures this data one <em>frame</em> at a time. Web applications can use the Leap application WebSocket server and the JavaScript API to access this data. The Leap sends tracking data through the socket connection as a JSON formated message. The JavaScript API takes the JSON and evaluates it into proper objects.</p>
+
+<p>For more information about the Leap and the Leap SDK, visit us on the Leap Developer Portal: <a href='https://developer.leapmotion.com'>https://developer.leapmotion.com</a></p>
+
+<h2>Installation:</h2>
+
+<p>Copy leap.js to your desired location. We also provide a minimized version, named leap.min.js.</p>
+
+<h2>Running a Leap-enabled web page</h2>
+
+<p>To run a Leap-enabled web page or application:</p>
+
+<ol>
+<li>Plug the Leap device into a USB port and place it in front of you.</li>
+<li>If you haven’t already, install the Leap software.</li>
+<li>Start the Leap application. If you haven’t already, enter your registered email address and password when prompted. The Leap icon appears in the notification area of the task bar (on Windows) or finder bar (on Mac) and turns green when ready.</li>
+<li>Open the page in a browser that supports WebSockets.</li>
+</ol>
+
+<p>Note: Port 6437 on the loopback address (i.e. localhost) must be reachable (and not used by another application).</p>
+
+<h2>Basic Usage:</h2>
+
+<p>Since the Leap provides data continuously, you need to set up an event loop to handle individual frames of data. You can set up a loop to handle the data as the Leap produces each frame, or you can set up a loop to handle the data when your application is ready to do something with it. The Leap JavaScript client library supports both options. </p>
+
+<h3>Using the browser animation loop</h3>
+
+<p>The Leap API provides the <code>loop()</code> function, which invokes a callback you provide whenever the browser is ready to draw.</p>
+
+<pre><code>Leap.loop( function( frame ) {
+    // ... your code here
+})
+</code></pre>
+
+<p>When you call <code>Leap.loop()</code>, it creates a Leap.Controller object and opens a connection to the Leap application WebSocket server. The function uses the browser <code>requestAnimationFrame()</code> method to invoke your callback function when the browser is ready to draw.</p>
+
+<h3>Using Leap frame events</h3>
+
+<p>The Leap frame rate can range from about 40 fps to over 200 fps, depending on the Leap operating mode and the capabilities of the client computer. To process each frame as it becomes available, you can create your own Leap Controller object:</p>
+
+<pre><code>var controller = new Leap.Controller();
+controller.onFrame(function() {
+    var frame = controller.frame();
+    //process frame data...
+})
+controller.connect()
+</code></pre>
+
+<hr />
+
+<p>All rights reserved.</p>
+
+<p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+
+<p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.<br />Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</p>
+
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Leap.Controller.html">Controller</a></li><li><a href="Leap.Frame.html">Frame</a></li><li><a href="Leap.Hand.html">Hand</a></li><li><a href="Leap.Pointable.html">Pointable</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Copyright &copy; 2012-2013 <a href="https://developer.leapmotion.com">Leap Motion</a>
+</footer>
+
+<script> prettyPrint(); </script>
+</body>
+</html>
