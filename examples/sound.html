@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>Dumper - Leap</title>
+    <script src="../leap.js"></script>
+    <script>
+      var pausedFrame = null;
+      var latestFrame = null;
+      window.onkeypress = function(e) {
+        if (e.charCode == 32) {
+          if (pausedFrame == null) {
+            pausedFrame = latestFrame
+          } else {
+            pausedFrame = null;
+          }
+        }
+      }
+
+var context = new webkitAudioContext(),
+        oscillator = context.createOscillator();
+window.oscillator = oscillator;
+
+oscillator.frequency.value = 440;
+oscillator.connect(context.destination);
+oscillator.noteOn && oscillator.noteOn(0);
+i = 440;
+
+
+      Leap.loop(function(frame) {
+        latestFrame = frame
+
+
+        if (latestFrame.fingers.length < 2) {
+          //oscillator.noteOff(0)
+        } else {
+          //i = Math.abs(latestFrame.hands[0].sphereCenter[0])*10;
+          var x = latestFrame.fingers[0].tipPosition
+          var y = latestFrame.fingers[1].tipPosition
+          var i = Math.sqrt(
+            Math.pow( x[0]-y[0], 2) +
+            Math.pow( x[1]-y[1], 2) +
+            Math.pow( x[2]-y[2], 2)
+          )
+          i = 2000 - (i*8)
+
+          oscillator.frequency.value = i
+          oscillator.noteOn(0)
+        }
+
+
+        document.getElementById('out').innerHTML = (
+          pausedFrame ? "<p><b>PAUSED</b></p>" : "<h1>freq "+oscillator.frequency.value+"</h1>") + "<div>"+(pausedFrame || latestFrame).dump()+"</div>"
+      })
+    </script>
+  </head>
+  <body>
+    <div id="out"></div>
+    <div id="log"></div>
+  </body>
+</html>
